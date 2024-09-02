@@ -1,0 +1,72 @@
+version: "2017-09-20"
+pipeline:
+    - id: build-postgres-operator
+      type: script
+      vm_config:
+        type: linux
+        size: large
+        image: cdp-runtime/go
+      cache:
+        paths:
+          - /go/pkg/mod       # pkg cache for Go modules
+          - ~/.cache/go-build # Go build cache
+      commands:
+        - desc: Run unit tests
+          cmd: |
+            make deps mocks test
+
+        - desc: Build Docker image
+          cmd: |
+            IS_PR_BUILD=${CDP_PULL_REQUEST_NUMBER+"true"}
+            if [[ ${CDP_TARGET_BRANCH} == "master" && ${IS_PR_BUILD} != "true" ]]
+            then
+              IMAGE=registry-write.opensource.zalan.do/acid/postgres-operator
+            else
+              IMAGE=registry-write.opensource.zalan.do/acid/postgres-operator-test
+            fi
+            export IMAGE
+            make docker push
+
+    - id: build-operator-ui
+      type: script
+      vm_config:
+        type: linux
+
+      commands:
+        - desc: 'Prepare environment'
+          cmd: |
+            apt-get update
+            apt-get install -y build-essential
+
+        - desc: 'Compile JavaScript app'
+          cmd: |
+            cd ui
+            make appjs
+
+        - desc: 'Build and push Docker image'
+          cmd: |
+            cd ui
+            IS_PR_BUILD=${CDP_PULL_REQUEST_NUMBER+"true"}
+            if [[ ${CDP_TARGET_BRANCH} == "master" && ${IS_PR_BUILD} != "true" ]]
+            then
+              IMAGE=registry-write.opensource.zalan.do/acid/postgres-operator-ui
+            else
+              IMAGE=registry-write.opensource.zalan.do/acid/postgres-operator-ui-test
+            fi
+            export IMAGE
+            make docker
+            make push
+
+    - id: build-logical-backup
+      type: script
+      vm_config:
+        type: linux
+
+      commands:
+        - desc: Build image
+          cmd: |
+            cd logical-backup
+            export TAG=$(git describe --tags --always --dirty)
+            IMAGE="registry-write.opensource.zalan.do/acid/logical-backup"
+            docker build --rm -t "$IMAGE:$TAG$CDP_TAG" .
+            docker push "$IMAGE:$TAG$CDP_TAG"
