@@ -1,4 +1,5 @@
 # ingress
+
 ```python
 helm upgrade --install ingress-nginx ingress-nginx \
   --repo https://kubernetes.github.io/ingress-nginx \
@@ -6,6 +7,7 @@ helm upgrade --install ingress-nginx ingress-nginx \
 ```
 
 # mongodb
+
 ```python
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm install mongodb-dev bitnami/mongodb -n default
@@ -13,6 +15,7 @@ helm delete mongodb-dev -n default
 ```
 
 # rancher
+
 ```python
 helm repo add rancher-latest https://releases.rancher.com/server-charts/latest
 
@@ -41,6 +44,7 @@ kubectl get secret --namespace cattle-system bootstrap-secret -o go-template='{{
 ```
 
 # kafka using confluent
+
 ```python
 kubectl config set-context --current --namespace confluent
 kubectl create namespace confluent
@@ -62,5 +66,8 @@ kubectl delete -f $TUTORIAL_HOME/confluent-platform.yaml
 kubectl delete namespace confluent
 
 ```
-# kafka using confluent
 
+# postgres 
+```python
+https://postgres-operator.readthedocs.io/en/latest/quickstart/
+```
