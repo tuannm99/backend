@@ -3,9 +3,9 @@ apiVersion: platform.confluent.io/v1beta1
 kind: Zookeeper
 metadata:
   name: zookeeper
-  namespace: confluent
+  namespace: default
 spec:
-  replicas: 3
+  replicas: 1
   image:
     application: confluentinc/cp-zookeeper:7.6.0
     init: confluentinc/confluent-init-container:2.8.0
@@ -24,12 +24,12 @@ apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
 metadata:
   name: kafka
-  namespace: confluent
+  namespace: default
 spec:
-  replicas: 3
+  replicas: 1
   dataVolumeCapacity: 10Gi
   metricReporter:
-    enabled: true
+    enabled: false
   image:
     application: confluentinc/cp-server:7.6.0
     init: confluentinc/confluent-init-container:2.8.0
@@ -39,11 +39,11 @@ spec:
   # podTemplate:
   #   resources:
   #     requests:
-  #       memory: "256Mi"
-  #       cpu: "250m"
+  #       memory: '512Mi'
+  #       cpu: '250m'
   #     limits:
-  #       memory: "518Mi"
-  #       cpu: "500m"
+  #       memory: '1Gi'
+  #       cpu: '500m'
 
 # ---
 # apiVersion: platform.confluent.io/v1beta1

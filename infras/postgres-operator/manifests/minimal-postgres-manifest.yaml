@@ -1,0 +1,21 @@
+apiVersion: 'acid.zalan.do/v1'
+kind: postgresql
+metadata:
+  name: pg-minimal-cluster
+spec:
+  teamId: 'acid'
+  volume:
+    size: 10Gi
+  numberOfInstances: 2
+  users:
+    admin: # database owner
+      - superuser
+      - createdb
+    postgres:
+      - createdb
+  databases:
+    testdb: postgres
+  preparedDatabases:
+    bar: {}
+  postgresql:
+    version: '16'

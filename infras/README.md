@@ -32,12 +32,15 @@ helm install cert-manager jetstack/cert-manager \
   --create-namespace
 
 ------------
-
 helm install rancher rancher-latest/rancher \
   --namespace cattle-system \
-  --set hostname=<IP_OF_LINUX_NODE>.sslip.io \
+  --set hostname=rancher.domain.com \
   --set replicas=1 \
-  --set bootstrapPassword=<PASSWORD_FOR_RANCHER_ADMIN>
+  --set bootstrapPassword=pwd \
+  --set ingress.tls.source=letsEncrypt \
+  --set letsEncrypt.email=mail \
+  --set letsEncrypt.ingress.class=traefik
+
 
 kubectl get secret --namespace cattle-system bootstrap-secret -o go-template='{{.data.bootstrapPassword|base64decode}}{{"\n"}}'
 
