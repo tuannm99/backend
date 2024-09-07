@@ -9,8 +9,8 @@ spec:
   image:
     application: confluentinc/cp-zookeeper:7.6.0
     init: confluentinc/confluent-init-container:2.8.0
-  dataVolumeCapacity: 10Gi
-  logVolumeCapacity: 10Gi
+  dataVolumeCapacity: 20Gi
+  logVolumeCapacity: 20Gi
   podTemplate:
     resources:
       requests:
@@ -26,8 +26,8 @@ metadata:
   name: kafka
   namespace: default
 spec:
-  replicas: 1
-  dataVolumeCapacity: 10Gi
+  replicas: 2
+  dataVolumeCapacity: 50Gi
   metricReporter:
     enabled: false
   image:
@@ -35,16 +35,14 @@ spec:
     init: confluentinc/confluent-init-container:2.8.0
   dependencies:
     zookeeper:
-      endpoint: zookeeper.confluent.svc.cluster.local:2181
-  # podTemplate:
-  #   resources:
-  #     requests:
-  #       memory: '512Mi'
-  #       cpu: '250m'
-  #     limits:
-  #       memory: '1Gi'
-  #       cpu: '500m'
-
+      endpoint: zookeeper.default.svc.cluster.local:2181
+  podTemplate:
+    resources:
+      requests:
+        memory: '512Mi'
+        cpu: '500m'
+      limits:
+        memory: '1.5Gi'
 # ---
 # apiVersion: platform.confluent.io/v1beta1
 # kind: Connect
