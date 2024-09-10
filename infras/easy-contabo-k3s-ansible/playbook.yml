@@ -1,0 +1,73 @@
+---
+- name: Deploy K3s cluster with Longhorn
+  hosts: all
+  become: yes
+  vars:
+    k3s_version: 'v1.27.6+k3s1'
+    longhorn_version: 'v1.6.2'
+    k3s_cluster_token: 'my-cluster-token' # Replace with a secure token for your cluster
+
+  pre_tasks:
+    - name: Install dependencies
+      apt:
+        name: ['curl', 'nfs-common', 'open-iscsi']
+        state: present
+        update_cache: yes
+
+  tasks:
+    - name: Install K3s on the first control plane
+      hosts: control-plane[0]
+      become: true
+      tasks:
+        - name: Install K3s control plane with etcd
+          shell: |
+            curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_cluster_token }} INSTALL_K3S_VERSION={{ k3s_version }} sh -s - server --cluster-init
+          args:
+            creates: /etc/rancher/k3s/k3s.yaml
+
+        - name: Copy Kubeconfig file to the user directory
+          copy:
+            src: /etc/rancher/k3s/k3s.yaml
+            dest: /home/{{ ansible_user }}/.kube/config
+            owner: '{{ ansible_user }}'
+            group: '{{ ansible_user }}'
+            mode: 0644
+
+    - name: Install K3s on the second control plane
+      hosts: control-plane[1]
+      become: true
+      tasks:
+        - name: Install K3s control plane and join the existing cluster
+          shell: |
+            curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_cluster_token }} INSTALL_K3S_VERSION={{ k3s_version }} sh -s - server --server https://{{ hostvars['control-plane'][0]['ansible_host'] }}:6443
+          args:
+            creates: /etc/rancher/k3s/k3s.yaml
+
+    - name: Install K3s on the worker node
+      hosts: worker
+      become: true
+      tasks:
+        - name: Install K3s agent and join the existing cluster
+          shell: |
+            curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_cluster_token }} INSTALL_K3S_VERSION={{ k3s_version }} sh -s - agent --server https://{{ hostvars['control-plane'][0]['ansible_host'] }}:6443
+          args:
+            creates: /etc/rancher/k3s/k3s.yaml
+
+    - name: Install Longhorn on control-plane[0]
+      hosts: control-plane[0]
+      become: true
+      tasks:
+        - name: Create Longhorn namespace
+          shell: kubectl create namespace longhorn-system || true
+
+        - name: Install Longhorn using kubectl
+          shell: |
+            kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/{{ longhorn_version }}/deploy/longhorn.yaml
+          args:
+            creates: /var/lib/rancher/k3s/server/manifests/longhorn.yaml
+
+        - name: Wait for Longhorn to be ready
+          shell: |
+            kubectl -n longhorn-system wait --for=condition=available --timeout=600s deployment/longhorn-manager
+          retries: 10
+          delay: 60

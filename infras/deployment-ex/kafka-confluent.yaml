@@ -15,10 +15,10 @@ spec:
     resources:
       requests:
         memory: '128Mi'
-        cpu: '250m'
+        cpu: '150m'
       limits:
         memory: '256Mi'
-        cpu: '500m'
+        # cpu: '300m'
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
@@ -40,9 +40,9 @@ spec:
     resources:
       requests:
         memory: '512Mi'
-        cpu: '500m'
+        cpu: '200m'
       limits:
-        memory: '1.5Gi'
+        memory: '1Gi'
 # ---
 # apiVersion: platform.confluent.io/v1beta1
 # kind: Connect
