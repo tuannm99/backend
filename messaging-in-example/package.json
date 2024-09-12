@@ -1,0 +1,14 @@
+{
+    "name": "messaging",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "MIT",
+    "dependencies": {
+        "amqplib": "^0.10.4",
+        "bluebird": "^3.7.2",
+        "kafka-connect": "^4.0.0",
+        "kafka-streams": "^5.0.0",
+        "node-rdkafka": "^3.0.1",
+        "nats": "^2.22.0"
+    }
+}
