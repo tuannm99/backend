@@ -34,7 +34,7 @@ ui:
   # Defines the type of service created for the Consul UI (e.g. LoadBalancer, ClusterIP, NodePort).
   # NodePort is primarily used for local deployments.
   service:
-    type: NodePort
+    type: ClusterIP
   # Enables displaying metrics in the Consul UI.
   metrics:
     enabled: true
